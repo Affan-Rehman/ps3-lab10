@@ -1,50 +1,112 @@
 package expressivo;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class ExpressionTest {
 
     @Test
-    public void testSumExpression() {
-        // Test SumExpression
+    public void testBasicSumExpression() {
+        Expression expr = new SumExpression(new NumberExpression(3), new NumberExpression(4));
+        assertEquals("3.0 + 4.0", expr.toString());
+    }
+
+    @Test
+    public void testBasicProductExpression() {
+        Expression expr = new ProductExpression(new NumberExpression(5), new NumberExpression(6));
+        assertEquals("5.0 * 6.0", expr.toString());
+    }
+
+    @Test
+    public void testNestedExpressions() {
+        // Test nested sum and product expressions
+        Expression inner = new SumExpression(new NumberExpression(2), new NumberExpression(3));
+        Expression outer = new ProductExpression(inner, new NumberExpression(4));
+        assertEquals("(2.0 + 3.0) * 4.0", outer.toString());
+    }
+
+    @Test
+    public void testComplexNestedExpressions() {
+        // Test more complex nested expressions
+        Expression expr1 = new SumExpression(new NumberExpression(1), new NumberExpression(2));
+        Expression expr2 = new ProductExpression(new NumberExpression(3), new NumberExpression(4));
+        Expression combined = new SumExpression(expr1, expr2);
+        assertEquals("(1.0 + 2.0) + (3.0 * 4.0)", combined.toString());
+    }
+
+    @Test
+    public void testExpressionEquality() {
         Expression expr1 = new SumExpression(new NumberExpression(3), new NumberExpression(4));
-        System.out.println("expr1 (Sum): " + expr1.toString());
-        assertEquals("3.0 + 4.0", expr1.toString());
+        Expression expr2 = new SumExpression(new NumberExpression(3), new NumberExpression(4));
+        Expression expr3 = new SumExpression(new NumberExpression(4), new NumberExpression(3));
+
+        assertTrue(expr1.equals(expr2));  // Same structure and values
+        assertFalse(expr1.equals(expr3)); // Different order
+        assertFalse(expr1.equals(null));  // Null comparison
+        assertTrue(expr1.equals(expr1));   // Self comparison
     }
 
     @Test
-    public void testProductExpression() {
-        // Test ProductExpression
-        Expression expr2 = new ProductExpression(new NumberExpression(5), new NumberExpression(6));
-        System.out.println("expr2 (Product): " + expr2.toString());
-        assertEquals("5.0 * 6.0", expr2.toString());
+    public void testHashCodeConsistency() {
+        Expression expr1 = new SumExpression(new NumberExpression(3), new NumberExpression(4));
+        Expression expr2 = new SumExpression(new NumberExpression(3), new NumberExpression(4));
+        
+        assertEquals(expr1.hashCode(), expr2.hashCode());
+        assertEquals(expr1.hashCode(), expr1.hashCode()); // Multiple invocations
     }
 
     @Test
-    public void testEquality() {
-        // Test equality
-        Expression expr3 = new SumExpression(new NumberExpression(3), new NumberExpression(4));
-        Expression expr4 = new SumExpression(new NumberExpression(3), new NumberExpression(4));
-        Expression expr5 = new ProductExpression(new NumberExpression(5), new NumberExpression(6));
+    public void testZeroAndOneProperties() {
+        Expression zero = new NumberExpression(0);
+        Expression one = new NumberExpression(1);
+        Expression num = new NumberExpression(5);
 
-        System.out.println("Are expr3 and expr4 equal? " + expr3.equals(expr4)); // Should be true
-        System.out.println("Are expr1 and expr5 equal? " + expr3.equals(expr5)); // Should be false
+        Expression sumWithZero = new SumExpression(num, zero);
+        Expression productWithOne = new ProductExpression(num, one);
 
-        assertTrue(expr3.equals(expr4));  // Should be true
-        assertFalse(expr3.equals(expr5)); // Should be false
+        assertEquals("5.0 + 0.0", sumWithZero.toString());
+        assertEquals("5.0 * 1.0", productWithOne.toString());
     }
 
     @Test
-    public void testHashCode() {
-        // Test hashCode
-        Expression expr6 = new SumExpression(new NumberExpression(3), new NumberExpression(4));
-        Expression expr7 = new SumExpression(new NumberExpression(3), new NumberExpression(4));
+    public void testCommutativeProperty() {
+        Expression expr1 = new SumExpression(new NumberExpression(2), new NumberExpression(3));
+        Expression expr2 = new SumExpression(new NumberExpression(3), new NumberExpression(2));
+        Expression prod1 = new ProductExpression(new NumberExpression(2), new NumberExpression(3));
+        Expression prod2 = new ProductExpression(new NumberExpression(3), new NumberExpression(2));
 
-        System.out.println("HashCode of expr6 and expr7: " + (expr6.hashCode() == expr7.hashCode())); // Should be true
-        assertEquals(expr6.hashCode(), expr7.hashCode()); // Should be equal
+        // Note: This test might fail if your implementation considers order important
+        assertEquals(expr1.toString().replace(" ", ""), 
+                    expr2.toString().replace(" ", ""));
+        assertEquals(prod1.toString().replace(" ", ""), 
+                    prod2.toString().replace(" ", ""));
+    }
+
+    @Test
+    public void testDeepNesting() {
+        Expression expr = new ProductExpression(
+            new SumExpression(
+                new ProductExpression(new NumberExpression(1), new NumberExpression(2)),
+                new NumberExpression(3)
+            ),
+            new SumExpression(
+                new NumberExpression(4),
+                new NumberExpression(5)
+            )
+        );
+        assertEquals("((1.0 * 2.0) + 3.0) * (4.0 + 5.0)", expr.toString());
+    }
+
+    @Test
+    public void testEdgeCases() {
+        // Test with very large numbers
+        Expression largeNum = new NumberExpression(Double.MAX_VALUE);
+        Expression sum = new SumExpression(largeNum, new NumberExpression(1));
+        assertTrue(sum.toString().contains(String.valueOf(Double.MAX_VALUE)));
+        
+        // Test with negative numbers
+        Expression negNum = new NumberExpression(-5);
+        Expression prod = new ProductExpression(negNum, new NumberExpression(3));
+        assertEquals("-5.0 * 3.0", prod.toString());
     }
 }
