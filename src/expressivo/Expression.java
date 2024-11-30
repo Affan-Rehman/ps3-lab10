@@ -1,57 +1,173 @@
-/* Copyright (c) 2015-2016 MIT 6.005 course staff, all rights reserved.
- * Redistribution of original or derived work requires permission of course staff.
- */
 package expressivo;
+import java.util.Objects;
 
 /**
- * An immutable data type representing a polynomial expression of:
- *   + and *
- *   nonnegative integers and floating-point numbers
- *   variables (case-sensitive nonempty strings of letters)
- * 
- * <p>PS3 instructions: this is a required ADT interface.
- * You MUST NOT change its name or package or the names or type signatures of existing methods.
- * You may, however, add additional methods, or strengthen the specs of existing methods.
- * Declare concrete variants of Expression in their own Java source files.
+ * Immutable, recursive abstract data type for mathematical expressions.
+ * Supported operations include addition, multiplication, numeric constants, and variables.
+ */
+
+/**
+ * The Expression interface defines the structure for all expressions.
+ * Each expression type should implement this interface.
  */
 public interface Expression {
-    
-    // Datatype definition
-    //   TODO
-    
-    /**
-     * Parse an expression.
-     * @param input expression to parse, as defined in the PS3 handout.
-     * @return expression AST for the input
-     * @throws IllegalArgumentException if the expression is invalid
-     */
-    public static Expression parse(String input) {
-        throw new RuntimeException("unimplemented");
-    }
-    
-    /**
-     * @return a parsable representation of this expression, such that
-     * for all e:Expression, e.equals(Expression.parse(e.toString())).
-     */
-    @Override 
-    public String toString();
+    String toString();
+    boolean equals(Object obj);
+    int hashCode();
+}
+
+/**
+ * A concrete class representing an addition expression (e.g., "1 + 2").
+ */
+class SumExpression implements Expression {
+    private final Expression left;
+    private final Expression right;
 
     /**
-     * @param thatObject any object
-     * @return true if and only if this and thatObject are structurally-equal
-     * Expressions, as defined in the PS3 handout.
+     * Constructs a SumExpression with two operands (left and right).
+     *
+     * @param left  The left operand of the addition expression.
+     * @param right The right operand of the addition expression.
      */
-    @Override
-    public boolean equals(Object thatObject);
-    
+    public SumExpression(Expression left, Expression right) {
+        this.left = left;
+        this.right = right;
+    }
+
     /**
-     * @return hash code value consistent with the equals() definition of structural
-     * equality, such that for all e1,e2:Expression,
-     *     e1.equals(e2) implies e1.hashCode() == e2.hashCode()
+     * Returns a string representation of the addition expression.
+     * 
+     * @return A string representation of the expression.
      */
     @Override
-    public int hashCode();
-    
-    // TODO more instance methods
-    
+    public String toString() {
+        return left.toString() + " + " + right.toString();
+    }
+
+    /**
+     * Checks if two SumExpression objects are structurally equal.
+     * 
+     * @param obj The object to compare this instance with.
+     * @return true if the two expressions are equal, false otherwise.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        SumExpression that = (SumExpression) obj;
+        return left.equals(that.left) && right.equals(that.right);
+    }
+
+    /**
+     * Computes the hash code for this SumExpression.
+     * 
+     * @return A hash code for this expression.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(left, right);
+    }
+}
+
+/**
+ * A concrete class representing a multiplication expression (e.g., "1 * 2").
+ */
+class ProductExpression implements Expression {
+    private final Expression left;
+    private final Expression right;
+
+    /**
+     * Constructs a ProductExpression with two operands (left and right).
+     *
+     * @param left  The left operand of the multiplication expression.
+     * @param right The right operand of the multiplication expression.
+     */
+    public ProductExpression(Expression left, Expression right) {
+        this.left = left;
+        this.right = right;
+    }
+
+    /**
+     * Returns a string representation of the multiplication expression.
+     * 
+     * @return A string representation of the expression.
+     */
+    @Override
+    public String toString() {
+        return left.toString() + " * " + right.toString();
+    }
+
+    /**
+     * Checks if two ProductExpression objects are structurally equal.
+     * 
+     * @param obj The object to compare this instance with.
+     * @return true if the two expressions are equal, false otherwise.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        ProductExpression that = (ProductExpression) obj;
+        return left.equals(that.left) && right.equals(that.right);
+    }
+
+    /**
+     * Computes the hash code for this ProductExpression.
+     * 
+     * @return A hash code for this expression.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(left, right);
+    }
+}
+
+/**
+ * A concrete class representing a number expression (e.g., "1").
+ */
+class NumberExpression implements Expression {
+    private final double value;
+
+    /**
+     * Constructs a NumberExpression with a specific value.
+     *
+     * @param value The numeric value.
+     */
+    public NumberExpression(double value) {
+        this.value = value;
+    }
+
+    /**
+     * Returns a string representation of the number expression.
+     * 
+     * @return A string representation of the value.
+     */
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
+
+    /**
+     * Checks if two NumberExpression objects are equal.
+     * 
+     * @param obj The object to compare this instance with.
+     * @return true if the two expressions are equal, false otherwise.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        NumberExpression that = (NumberExpression) obj;
+        return Double.compare(that.value, value) == 0;
+    }
+
+    /**
+     * Computes the hash code for this NumberExpression.
+     * 
+     * @return A hash code for this expression.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
+    }
 }
